@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Plataforma</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Área do aluno</h1>
+    <a class="btn" href="/courses">Cursos</a>
+    <button id="logout" class="btn" style="background:#f14e4e;">Sair</button>
+  </header>
+  <main>
+    <section id="content" class="course" style="max-width:800px; margin:auto;">
+      <h2>Carregando dados...</h2>
+      <p>Aguarde enquanto verificamos sua sessão.</p>
+    </section>
+  </main>
+
+  <script>
+    const queryParams = new URLSearchParams(window.location.search);
+    const tokenFromQuery = queryParams.get('token');
+    if (tokenFromQuery) {
+      localStorage.setItem('token', tokenFromQuery);
+      window.history.replaceState({}, document.title, '/dashboard');
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login';
+    }
+
+    async function loadProfile() {
+      const res = await fetch('/api/me', { headers: { Authorization: 'Bearer ' + token } });
+      if (!res.ok) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        return;
+      }
+
+      const body = await res.json();
+      document.getElementById('content').innerHTML = `
+        <h2>Bem-vindo, ${body.user.name}</h2>
+        <p><strong>E-mail:</strong> ${body.user.email}</p>
+        <p>Você está autenticado e pode acessar cursos protegidos.</p>
+      `;
+    }
+
+    document.getElementById('logout').addEventListener('click', async () => {
+      await fetch('/api/logout', { method: 'POST', headers: { Authorization: 'Bearer ' + token } });
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    });
+
+    loadProfile();
+  </script>
+</body>
+</html>

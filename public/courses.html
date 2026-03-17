@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lista de Cursos - Plataforma</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Catálogo de Cursos</h1>
+    <a class="btn" href="/">Página inicial</a>
+  </header>
+  <main>
+    <div id="course-list">Carregando cursos...</div>
+  </main>
+
+  <script>
+    async function fetchCourses() {
+      const res = await fetch('/api/courses');
+      const data = await res.json();
+      const container = document.getElementById('course-list');
+
+      if (!Array.isArray(data)) {
+        container.innerHTML = '<p>Erro ao carregar cursos.</p>';
+        return;
+      }
+
+      container.innerHTML = data.map(course => `
+        <article class="course">
+          <h2>${course.title}</h2>
+          <p>${course.description}</p>
+          <strong>R$ ${course.price.toFixed(2)}</strong>
+          <form onsubmit="handleEnroll(event, ${course.id})">
+            <input type="text" name="name" placeholder="Seu nome" required />
+            <input type="email" name="email" placeholder="Seu e-mail" required />
+            <button type="submit">Inscrever-se</button>
+          </form>
+        </article>
+      `).join('');
+    }
+
+    async function handleEnroll(event, courseId) {
+      event.preventDefault();
+      const form = event.target;
+      const name = form.name.value;
+      const email = form.email.value;
+
+      const res = await fetch('/api/enroll', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, courseId })
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        alert('Erro: ' + (json.error || 'Falha na inscrição'));
+        return;
+      }
+
+      alert(json.message);
+      form.reset();
+    }
+
+    fetchCourses();
+  </script>
+</body>
+</html>

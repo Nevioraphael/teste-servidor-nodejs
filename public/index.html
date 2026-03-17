@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plataforma de Cursos Online</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Aulas no ar</h1>
+    <p>Bem-vindo à plataforma de cursos online.</p>
+  </header>
+  <main>
+    <section>
+      <h2>Comece agora</h2>
+      <p>Veja nossa lista de cursos disponívei﻿s e inscreva-se para aprender novas habilidades.</p>
+      <a class="btn" href="/courses">Ver cursos</a>
+      <a class="btn" href="/login" style="margin-left: 8px;">Entrar</a>
+      <button id="logoutBtn" class="btn" style="margin-left: 8px; background:#f14e4e; border:none; display:none;">Logout</button>
+    </section>
+    <section>
+      <h2>Contato</h2>
+      <p>Interessado em pacotes ou treinamentos corporativos? Envie um e-mail para suporte@example.com.</p>
+    </section>
+  </main>
+  <footer>
+    <small>© 2026 Plataforma de Cursos Online</small>
+  </footer>
+  <script>
+    const token = localStorage.getItem('token');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (token) {
+      logoutBtn.style.display = 'inline-block';
+    }
+
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await fetch('/api/logout', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + token }
+        });
+      } catch (err) {
+        console.warn('Erro no logout API:', err);
+      }
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    });
+  </script>
+</body>
+</html>
